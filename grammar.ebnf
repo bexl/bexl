@@ -1,0 +1,108 @@
+(*
+    BEXL v0.1
+    Basic EXpression Language
+
+    EBNF Grammar
+    ISO/IEC 14977
+    https://www.iso.org/standard/26153.html
+*)
+
+
+unicode = ? Any Unicode Character ?
+        ;
+
+ws = ? Any Unicode Character with property WSpace=yes ?
+   ;
+
+alpha = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K"
+      | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V"
+      | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g"
+      | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r"
+      | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+      ;
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+      ;
+
+integer literal = digit , {digit}
+                ;
+
+exponential = ("E" | "e") , { "-" | "+" } , integer literal
+            ;
+
+float literal = integer literal ,
+              ( exponential
+              | "." , digit , {digit} , [exponential]
+              )
+              ;
+
+boolean literal = "True" | "False"
+                ;
+
+string literal = "'" , { ( unicode - "'" ) | "\'" } , "'"
+               ;
+
+list literal = "[" , {ws} , [arguments] , {ws} , "]"
+             ;
+
+null literal = "Null"
+             ;
+
+literal = integer literal
+        | float literal
+        | string literal
+        | boolean literal
+        | list literal
+        | null literal
+        ;
+
+identifier = alpha , { alpha | digit | "_"  }
+           ;
+
+unary operator = "-" | "!"
+               ;
+
+binary operator = "+" | "-" | "*" | "/" | "%" | "**"
+                | "==" | "!=" | ">" | ">=" | "<" | "<="
+                | "&" | "|" | "^"
+                ;
+
+binary expression = expression , {ws} , binary operator , {ws} , expression
+                  ;
+
+unary expression = unary operator , {ws} , expression
+                 ;
+
+grouping = "(" , {ws} , expression , {ws} , ")"
+         ;
+
+arguments = expression , { {ws} , "," , {ws} , expression }
+          ;
+
+function call = identifier , "(" , {ws} , [arguments] , {ws} , ")"
+              ;
+
+variable = "$" , identifier
+         ;
+
+indexing = expression , "[" , {ws} ,
+         ( expression
+         | expression , {ws} , ":"
+         | ":" , {ws} , expression
+         | expression , {ws} , ":" , {ws} , expression
+         ) , {ws} , "]"
+         ;
+
+property access = expression , "." , identifier
+                ;
+
+expression = binary expression
+           | unary expression
+           | grouping
+           | function call
+           | variable
+           | indexing
+           | property access
+           | literal
+           ;
+
